@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Common\Async.fs" />
+    <Compile Include="Common\Result.fs" />
+    <Compile Include="Common\AsyncResult.fs" />
+    <Compile Include="Common\Harness.fs" />
+    <Compile Include="Common\ConstrainedType.fs" />
+    <Compile Include="Common\SimpleTypes.fs" />
+    <Compile Include="Common\CompoundTypes.fs" />
+    <Compile Include="Domain\CreateGroup\Contract.fs" />
+    <Compile Include="Domain\CreateGroup\Types.fs" />
+    <Compile Include="Domain\CreateGroup\Implementation.fs" />
+  </ItemGroup>
+
+</Project>
