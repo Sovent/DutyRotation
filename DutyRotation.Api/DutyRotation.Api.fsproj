@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Controllers\GroupsController.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Giraffe" Version="3.4.0" />
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DutyRotation.Infrastructure\DutyRotation.Infrastructure.fsproj" />
+    <ProjectReference Include="..\DutyRotation\DutyRotation.fsproj" />
+  </ItemGroup>
+
+</Project>

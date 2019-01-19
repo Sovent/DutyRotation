@@ -3,6 +3,7 @@
 open DutyRotation.Common
 open System
 
+[<CLIMutable>]
 type CreateSimpleGroupCommand = {
   GroupName : string
   RotationLength: TimeSpan

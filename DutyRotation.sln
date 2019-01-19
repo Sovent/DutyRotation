@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DutyRotation", "DutyRotation\DutyRotation.fsproj", "{A5EF2D5F-05E3-43B8-AA53-ED876869C5A1}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "DutyRotation", "DutyRotation\DutyRotation.fsproj", "{A5EF2D5F-05E3-43B8-AA53-ED876869C5A1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{4A80569D-5D12-40A6-879F-16EB2FD846FF}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DutyRotation.Infrastructure", "DutyRotation.Infrastructure\DutyRotation.Infrastructure.fsproj", "{9A56F260-4E27-4D48-ABCA-158B033CF98E}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DutyRotation.Api", "DutyRotation.Api\DutyRotation.Api.fsproj", "{77F6F80B-A4B5-4818-AE3E-82C3ACF13DB4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +21,21 @@ Global
 		{A5EF2D5F-05E3-43B8-AA53-ED876869C5A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5EF2D5F-05E3-43B8-AA53-ED876869C5A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A5EF2D5F-05E3-43B8-AA53-ED876869C5A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A56F260-4E27-4D48-ABCA-158B033CF98E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A56F260-4E27-4D48-ABCA-158B033CF98E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A56F260-4E27-4D48-ABCA-158B033CF98E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A56F260-4E27-4D48-ABCA-158B033CF98E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77F6F80B-A4B5-4818-AE3E-82C3ACF13DB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77F6F80B-A4B5-4818-AE3E-82C3ACF13DB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77F6F80B-A4B5-4818-AE3E-82C3ACF13DB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77F6F80B-A4B5-4818-AE3E-82C3ACF13DB4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9A56F260-4E27-4D48-ABCA-158B033CF98E} = {4A80569D-5D12-40A6-879F-16EB2FD846FF}
+		{77F6F80B-A4B5-4818-AE3E-82C3ACF13DB4} = {4A80569D-5D12-40A6-879F-16EB2FD846FF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {893729B3-A306-4738-83EC-0A1698024D65}

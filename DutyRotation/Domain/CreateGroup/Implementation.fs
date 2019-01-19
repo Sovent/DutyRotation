@@ -2,9 +2,7 @@
 
 open DutyRotation.Common
 
-module CreateGroup =
-  open System
-
+module GroupCreation =
   let getGroupSettings : GetGroupSettings =
     fun command ->
       let (groupName, rotationLength, dutiesCount) = match command with
