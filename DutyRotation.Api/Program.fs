@@ -10,7 +10,7 @@ module Program =
     open System
 
     let exitCode = 0
-
+    
     let webApp =
       choose [
         route "/ping"   >=> text "pong"
@@ -24,9 +24,12 @@ module Program =
 
     let configureServices (services : IServiceCollection) =
       services.AddGiraffe() |> ignore
-
+        
     let CreateWebHostBuilder args =
-        WebHostBuilder().UseKestrel().Configure(Action<IApplicationBuilder> configureApp).ConfigureServices(configureServices)
+        WebHostBuilder()
+          .UseKestrel()
+          .Configure(Action<IApplicationBuilder> configureApp)
+          .ConfigureServices(configureServices)
 
     [<EntryPoint>]
     let main args =
