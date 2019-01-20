@@ -3,7 +3,9 @@ namespace DutyRotation.Api
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.AspNetCore.Hosting
+open DutyRotation.Infrastructure.JsonSerializers
 open Giraffe
+open Giraffe.Serialization
 open GroupsController
 
 module Program =
@@ -15,6 +17,7 @@ module Program =
       choose [
         route "/ping"   >=> text "pong"
         POST >=> choose [
+          route "/group/members" >=> addGroupMember
           route "/group" >=> createSimpleGroup
         ]
       ]
@@ -24,6 +27,8 @@ module Program =
 
     let configureServices (services : IServiceCollection) =
       services.AddGiraffe() |> ignore
+      
+      services.AddSingleton<IJsonSerializer>(NewtonsoftJsonSerializer(jsonSerializationSettings)) |> ignore
         
     let CreateWebHostBuilder args =
         WebHostBuilder()

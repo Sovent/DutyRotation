@@ -2,7 +2,8 @@
 
 type GroupSettings = {
   Name: GroupName
-  RotationLength: RotationLength
+  RotationCronRule: RotationCronRule
+  RotationStartDate: RotationStartDate option
   DutiesCount: DutiesCount
 }
 

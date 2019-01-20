@@ -15,6 +15,7 @@
     <Compile Include="Domain\CreateGroup\Contract.fs" />
     <Compile Include="Domain\CreateGroup\Types.fs" />
     <Compile Include="Domain\CreateGroup\Implementation.fs" />
+    <Compile Include="Domain\AddGroupMember\Contract.fs" />
   </ItemGroup>
 
 </Project>

@@ -13,18 +13,26 @@ with
   member this.Value = let (GroupName groupName) = this in groupName
   static member TryParse = ConstrainedType.createDefaultConstrainedString GroupName
 
-type RotationLength = private RotationLength of TimeSpan
+type RotationCronRule = private RotationCronRule of string
 with
-  member this.Value = let (RotationLength rotationLength) = this in rotationLength
-  static member TryGet(rotationLength:TimeSpan) =
-    if rotationLength > TimeSpan.Zero then RotationLength rotationLength |> Ok
-    else ValidationError.create "Rotation length should be positive" rotationLength
+  member this.Value = let (RotationCronRule groupName) = this in groupName
+  static member TryParse = ConstrainedType.createDefaultConstrainedString RotationCronRule
+
+type RotationStartDate = RotationStartDate of DateTimeOffset
+with
+  member this.Value = let (RotationStartDate startDate) = this in startDate
 
 type DutiesCount = private DutiesCount of int
 with
   member this.Value = let (DutiesCount dutiesCount) = this in dutiesCount
   static member TryGet(dutiesCount:int) = 
     ConstrainedType.createInt DutiesCount 1 Int32.MaxValue dutiesCount
+
+type GroupMemberId = private GroupMemberId of Guid
+with
+  member this.Value = let (GroupMemberId id) = this in id
+  static member TryGet = ConstrainedType.createGuid GroupMemberId
+  static member New = Guid.NewGuid() |> GroupMemberId
 
 type SlackChannel = private SlackChannel of string
 

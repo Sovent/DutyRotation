@@ -14,11 +14,11 @@ type ValidationError = {
   Value: string
 }
 module ValidationError =
-  let create message value =
+  let createSingle message value =
     let validationError : ValidationError = {
       Type = typeof<'a>.Name
       Description = message
       Value = value.ToString()
     }
-    Error validationError
+    validationError |> List.singleton |> Error
     

@@ -12,10 +12,11 @@ type sql = SqlDataProvider<Common.DatabaseProviderTypes.MSSQLSERVER, connectionS
 let saveGroup : SaveGroup =
   fun group ->
     let ctx = sql.GetDataContext()
-    ctx.Dbo.Groups.Create(
-       group.Settings.DutiesCount.Value, 
-       Guid.Parse group.Id.Value, 
-       group.Settings.Name.Value,
-       group.Settings.RotationLength.Value.Ticks
-    ) |> ignore
+    let row = ctx.Dbo.Groups.Create()
+    row.Id <- Guid.Parse group.Id.Value
+    row.Name <- group.Settings.Name.Value
+    row.DutiesCount <- group.Settings.DutiesCount.Value
+    row.RotationCronRule <- group.Settings.RotationCronRule.Value
+    group.Settings.RotationStartDate |> Option.iter (fun date -> row.RotationStartDate <- date.Value.UtcDateTime)
+    row.CreatedDate <- DateTime.UtcNow   
     ctx.SubmitUpdatesAsync ()

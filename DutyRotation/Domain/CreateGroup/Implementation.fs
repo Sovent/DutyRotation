@@ -5,20 +5,19 @@ open DutyRotation.Common
 module GroupCreation =
   let getGroupSettings : GetGroupSettings =
     fun command ->
-      let (groupName, rotationLength, dutiesCount) = match command with
-        | CreateSimpleGroupCommand comm -> (comm.GroupName, comm.RotationLength, comm.DutiesCount) 
-        | CreateSlackGroupCommand comm -> (comm.GroupName, comm.RotationLength, comm.DutiesCount)
-
-      result {
-        let! groupName = GroupName.TryParse groupName |> Result.toSingleErrorList
-        let! rotationLength = RotationLength.TryGet rotationLength |> Result.toSingleErrorList
-        let! dutiesCount = DutiesCount.TryGet dutiesCount |> Result.toSingleErrorList
-        return {
+      let createGroupSettings groupName rotationCronRule dutiesCount rotationStartDate = {
           Name = groupName
-          RotationLength = rotationLength
+          RotationCronRule = rotationCronRule
           DutiesCount = dutiesCount
-        }
+          RotationStartDate = rotationStartDate
       }
+      let (<!>) = Result.map
+      let (<*>) = Result.apply
+      let groupName = GroupName.TryParse command.GroupName
+      let rotationCronRule = RotationCronRule.TryParse command.RotationCronRule
+      let rotationStartDate = command.RotationStartDate |> Option.map RotationStartDate |> Ok
+      let dutiesCount = DutiesCount.TryGet command.DutiesCount
+      createGroupSettings <!> groupName <*> rotationCronRule <*> dutiesCount <*> rotationStartDate
 
   let createGroupId : CreateGroupId = fun () -> GroupId.New
 
@@ -32,7 +31,7 @@ module GroupCreation =
   let createSimpleGroup (saveGroup : SaveGroup) : CreateSimpleGroup =
     fun command ->
       asyncResult {
-        let! groupSettings = CreateSimpleGroupCommand command |> getGroupSettings |> AsyncResult.ofResult
+        let! groupSettings = command |> getGroupSettings |> AsyncResult.ofResult
         let groupId = createGroupId ()
         let group = createGroup groupSettings groupId
         let! saveGroup = saveGroup group |> AsyncResult.ofAsync
