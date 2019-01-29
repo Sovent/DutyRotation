@@ -1,24 +1,14 @@
 ﻿namespace DutyRotation.Common
 
-open System
-
-//type DomainEvent<'a> = {
-//  Id: Guid
-//  OccuredOn: DateTimeOffset
-//  Payload: 'a
-//}
-
 type ValidationError = {
-  Type: string
   Description: string
   Value: string
 }
 module ValidationError =
   let createSingle message value =
     let validationError : ValidationError = {
-      Type = typeof<'a>.Name
       Description = message
-      Value = value.ToString()
+      Value = if value = Unchecked.defaultof<'a> then "null" else value.ToString()
     }
     validationError |> List.singleton |> Error
     

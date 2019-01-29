@@ -1,9 +1,35 @@
-﻿namespace DutyRotation.CreateGroup
+namespace DutyRotation.CreateGroup
 
 open DutyRotation.Common
+open System
 
-module GroupCreation =
-  let getGroupSettings : GetGroupSettings =
+module Contract =  
+  [<CLIMutable>]
+  type CreateSimpleGroupCommand = {
+    GroupName : string
+    RotationCronRule: string
+    DutiesCount : int
+    RotationStartDate : DateTimeOffset option
+  }
+  
+  type CreateSimpleGroup = CreateSimpleGroupCommand -> AsyncResult<GroupId, ValidationError list>
+
+module Types =
+  open Contract
+  
+  type GetGroupSettings = CreateSimpleGroupCommand -> Result<GroupSettings, ValidationError list>
+  
+  type CreateGroupId = unit -> GroupId
+  
+  type CreateGroup = GroupSettings -> GroupId -> Group
+  
+  type SaveGroup = Group -> Async<unit>
+
+module Implementation =
+  open Types
+  open Contract
+  
+  let private getGroupSettings : GetGroupSettings =
     fun command ->
       let createGroupSettings groupName rotationCronRule dutiesCount rotationStartDate = {
           Name = groupName
@@ -19,15 +45,15 @@ module GroupCreation =
       let dutiesCount = DutiesCount.TryGet command.DutiesCount
       createGroupSettings <!> groupName <*> rotationCronRule <*> dutiesCount <*> rotationStartDate
 
-  let createGroupId : CreateGroupId = fun () -> GroupId.New
+  let private createGroupId : CreateGroupId = fun () -> GroupId.New
 
-  let createGroup : CreateGroup =
+  let private createGroup : CreateGroup =
     fun settings id ->
       {
         Id = id
         Settings = settings
       }
-
+      
   let createSimpleGroup (saveGroup : SaveGroup) : CreateSimpleGroup =
     fun command ->
       asyncResult {

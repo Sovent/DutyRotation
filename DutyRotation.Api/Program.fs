@@ -17,8 +17,8 @@ module Program =
       choose [
         route "/ping"   >=> text "pong"
         POST >=> choose [
-          route "/group/members" >=> addGroupMember
-          route "/group" >=> createSimpleGroup
+          routeCif "/groups/%O/members" addGroupMember
+          route "/groups" >=> createSimpleGroup
         ]
       ]
 

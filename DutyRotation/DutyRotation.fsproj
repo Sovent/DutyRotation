@@ -12,10 +12,8 @@
     <Compile Include="Common\ConstrainedType.fs" />
     <Compile Include="Common\SimpleTypes.fs" />
     <Compile Include="Common\CompoundTypes.fs" />
-    <Compile Include="Domain\CreateGroup\Contract.fs" />
-    <Compile Include="Domain\CreateGroup\Types.fs" />
-    <Compile Include="Domain\CreateGroup\Implementation.fs" />
-    <Compile Include="Domain\AddGroupMember\Contract.fs" />
+    <Compile Include="Domain\CreateGroup.fs" />
+    <Compile Include="Domain\AddGroupMember.fs" />
   </ItemGroup>
 
 </Project>

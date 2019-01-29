@@ -1,6 +1,8 @@
 ﻿namespace global
 
 module Result =
+  open System.IO
+
   let map = Result.map
   let mapError = Result.mapError
   let toSingleErrorList<'a, 'b> : (Result<'a, 'b> -> Result<'a, 'b list>) = 
@@ -13,7 +15,12 @@ module Result =
     | Error errs, Ok x -> Error errs
     | Ok f, Error errs -> Error errs
     | Error errs1, Error errs2 -> Error (List.concat [errs1; errs2])
-
+    
+  let value value =
+      match value with
+      | Ok content -> content
+      | _ -> raise <| InvalidDataException("Value is missing")
+  
 [<AutoOpen>]
 module ResultComputationExpression =
 

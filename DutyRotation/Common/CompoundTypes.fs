@@ -11,3 +11,8 @@ type Group = {
   Id: GroupId
   Settings: GroupSettings
 }
+
+type GroupMember = {
+  Id: GroupMemberId
+  Name : GroupMemberName
+}

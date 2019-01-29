@@ -2,11 +2,11 @@
 
 open System
 
-type GroupId = private | GroupId of string
+type GroupId = private | GroupId of Guid
 with
   member this.Value = let (GroupId groupId) = this in groupId
-  static member TryParse = ConstrainedType.createDefaultConstrainedString GroupId
-  static member New = Guid.NewGuid().ToString() |> GroupId
+  static member TryParse = ConstrainedType.createGuid GroupId
+  static member New = Guid.NewGuid() |> GroupId
 
 type GroupName = private GroupName of string
 with
@@ -34,6 +34,11 @@ with
   static member TryGet = ConstrainedType.createGuid GroupMemberId
   static member New = Guid.NewGuid() |> GroupMemberId
 
+type GroupMemberName = private GroupMemberName of string
+with
+  member this.Value = let (GroupMemberName groupMemberName) = this in groupMemberName
+  static member TryParse = ConstrainedType.createDefaultConstrainedString GroupMemberName
+  
 type SlackChannel = private SlackChannel of string
 
 type SlackUserGroup = private SlackUserGroup of string
