@@ -6,3 +6,9 @@ module CompositionRoot =
   
   open DutyRotation.AddGroupMember.Implementation
   let addGroupMember = addGroupMember GroupRepository.getGroupMember GroupRepository.saveMember
+  
+  open DutyRotation.RotateDuties.Implementation
+  let rotateDuties = rotateDuties 
+                      GroupRepository.getGroupDutiesCount 
+                      GroupRepository.getGroupMembersForRotation 
+                      GroupRepository.saveMembers

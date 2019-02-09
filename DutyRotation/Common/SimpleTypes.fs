@@ -7,6 +7,10 @@ with
   member this.Value = let (GroupId groupId) = this in groupId
   static member TryParse = ConstrainedType.createGuid GroupId
   static member New = Guid.NewGuid() |> GroupId
+  
+type GroupNotFoundError = {
+  GroupId : GroupId
+}
 
 type GroupName = private GroupName of string
 with
@@ -46,7 +50,8 @@ with
 module GroupMemberQueuePosition =  
   let tryGet = ConstrainedType.createInt GroupMemberQueuePosition 0 Int32.MaxValue
   let first = GroupMemberQueuePosition 0
-  let after (GroupMemberQueuePosition queuePosition) = queuePosition + 1 |> GroupMemberQueuePosition
+  let shiftOn n (GroupMemberQueuePosition queuePosition) = queuePosition + n |> min 0 |> GroupMemberQueuePosition
+  let nextAfter = shiftOn 1
   
 type SlackChannel = private SlackChannel of string
 

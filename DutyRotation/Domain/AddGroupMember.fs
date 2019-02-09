@@ -10,10 +10,6 @@ module Contract =
     MemberName: string
   }
   
-  type GroupNotFoundError = {
-    GroupId : GroupId
-  }
-  
   type MemberWithSameNameExists = {
     GroupId : GroupId
     MemberName : GroupMemberName
@@ -65,7 +61,7 @@ module Implementation =
                             | members -> members
                                          |> Seq.map (fun membr -> membr.Position)
                                          |> Seq.max
-                                         |> GroupMemberQueuePosition.after
+                                         |> GroupMemberQueuePosition.nextAfter
         {
           Id = newMemberId
           Name = newMemberName

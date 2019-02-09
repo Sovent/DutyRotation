@@ -3,6 +3,7 @@
 open Giraffe
 open DutyRotation.CreateGroup.Contract
 open DutyRotation.AddGroupMember.Contract
+open DutyRotation.RotateDuties.Contract
 open DutyRotation.Infrastructure
 open FSharp.Control.Tasks
 open Microsoft.AspNetCore.Http
@@ -32,7 +33,21 @@ let addGroupMember groupId : HttpHandler =
           let command = { AddGroupMemberCommand.GroupId = groupId; MemberName = model.MemberName }
           let! commandResult = CompositionRoot.addGroupMember command |> Async.StartAsTask
           let httpResult = match commandResult with
-                               | Ok groupId -> Successful.CREATED groupId.Value
+                               | Ok memberId -> Successful.CREATED memberId.Value
+                               | Error errors -> RequestErrors.BAD_REQUEST errors
+          return! httpResult next context
+        with
+          | exc -> return! RequestErrors.BAD_REQUEST exc next context    
+    }
+
+let rotateDuties groupId : HttpHandler =
+  fun (next: HttpFunc) (context: HttpContext) ->
+    task {
+      try
+          let command = { RotateDutiesCommand.GroupId = groupId }
+          let! commandResult = CompositionRoot.rotateDuties command |> Async.StartAsTask
+          let httpResult = match commandResult with
+                               | Ok currentDuties -> Successful.OK currentDuties
                                | Error errors -> RequestErrors.BAD_REQUEST errors
           return! httpResult next context
         with

@@ -18,6 +18,7 @@ module Program =
         route "/ping"   >=> text "pong"
         POST >=> choose [
           routeCif "/groups/%O/members" addGroupMember
+          routeCif "/groups/%O/rotation" rotateDuties
           route "/groups" >=> createSimpleGroup
         ]
       ]
