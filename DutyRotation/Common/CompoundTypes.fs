@@ -15,4 +15,5 @@ type Group = {
 type GroupMember = {
   Id: GroupMemberId
   Name : GroupMemberName
+  Position: GroupMemberQueuePosition
 }

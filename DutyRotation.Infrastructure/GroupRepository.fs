@@ -5,14 +5,15 @@ open FSharp.Data.Sql
 open DutyRotation.Common
 open DutyRotation.CreateGroup.Types
 open DutyRotation.AddGroupMember.Types
+open DutyRotation.Common
 
 [<Literal>]
 let connectionString = @"Data Source=den1.mssql8.gear.host;Initial Catalog=dutyrotation;Persist Security Info=True;User ID=dutyrotation;Password=Yo845n_L?4DA"
 
 type sql = SqlDataProvider<Common.DatabaseProviderTypes.MSSQLSERVER, connectionString>
 
-FSharp.Data.Sql.Common.QueryEvents.SqlQueryEvent |> Event.add (printfn "Executing SQL: %O")
-
+FSharp.Data.Sql.Common.QueryEvents.SqlQueryEvent |> Event.add (printfn "Executing SQL: %O")  
+  
 let saveGroup : SaveGroup =
   fun group ->
     let ctx = sql.GetDataContext()
@@ -38,6 +39,8 @@ let getGroupMember: GetGroupMembers =
       return rows |> Seq.map (fun row -> {
         Id = GroupMemberId.TryGet row.Id |> Result.value
         Name = GroupMemberName.TryParse row.Name |> Result.value
+        //todo: handle overflow issues
+        Position = row.QueuePosition |> int |> GroupMemberQueuePosition.tryGet |> Result.value
       })
     }
     groupMembers |> AsyncResult.ofAsync |> AsyncResult.map Seq.toList
@@ -50,4 +53,5 @@ let saveMember: SaveMember =
     row.Id <- groupMember.Id.Value
     row.Name <- groupMember.Name.Value
     row.GroupId <- groupId.Value
+    row.QueuePosition <- groupMember.Position.Value |> int64
     ctx.SubmitUpdatesAsync ()

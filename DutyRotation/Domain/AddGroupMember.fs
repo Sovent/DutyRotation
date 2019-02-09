@@ -60,9 +60,16 @@ module Implementation =
         } |> Error
       else
         let newMemberId = getNewMemberId ()
+        let queuePosition = match members with
+                            | [] -> GroupMemberQueuePosition.first
+                            | members -> members
+                                         |> Seq.map (fun membr -> membr.Position)
+                                         |> Seq.max
+                                         |> GroupMemberQueuePosition.after
         {
           Id = newMemberId
           Name = newMemberName
+          Position =  queuePosition
         } |> Ok
     
   let addGroupMember (getGroupMembers: GetGroupMembers) (saveMember: SaveMember) : AddGroupMember =
