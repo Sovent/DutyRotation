@@ -33,7 +33,10 @@ module Types =
   
   type GetNewMemberId = unit -> GroupMemberId
   
-  type AddNewMember = GroupMember list -> GroupId -> GroupMemberName -> Result<GroupMember, MemberWithSameNameExists>
+  type GetQueuePosition = GroupMember list -> QueuePosition
+  
+  type CreateNewMember =
+    GroupMember list -> GroupId -> GroupMemberName -> QueuePosition -> Result<GroupMember, MemberWithSameNameExists>
   
   type SaveMember = GroupId -> GroupMember -> Async<unit>
 
@@ -47,8 +50,10 @@ module Implementation =
   
   let getNewMemberId : GetNewMemberId = fun _ -> GroupMemberId.New
   
-  let addNewMember (getNewMemberId:GetNewMemberId) : AddNewMember =
-    fun members groupId newMemberName ->
+  let getQueuePosition : GetQueuePosition = QueuePosition.tail
+    
+  let addNewMember (getNewMemberId:GetNewMemberId) : CreateNewMember =
+    fun members groupId newMemberName queuePosition ->
       if Seq.exists (fun groupMember -> groupMember.Name = newMemberName) members then
         {
           GroupId = groupId
@@ -56,16 +61,10 @@ module Implementation =
         } |> Error
       else
         let newMemberId = getNewMemberId ()
-        let queuePosition = match members with
-                            | [] -> GroupMemberQueuePosition.first
-                            | members -> members
-                                         |> Seq.map (fun membr -> membr.Position)
-                                         |> Seq.max
-                                         |> GroupMemberQueuePosition.nextAfter
         {
           Id = newMemberId
           Name = newMemberName
-          Position =  queuePosition
+          QueuePosition = queuePosition
         } |> Ok
     
   let addGroupMember (getGroupMembers: GetGroupMembers) (saveMember: SaveMember) : AddGroupMember =
@@ -79,7 +78,8 @@ module Implementation =
                                    |> AsyncResult.mapError Validation
         let! groupMembers = getGroupMembers groupId
                             |> AsyncResult.mapError GroupNotFound
-        let! newMember = addNewMember getNewMemberId groupMembers groupId memberName
+        let groupPosition = getQueuePosition groupMembers
+        let! newMember = addNewMember getNewMemberId groupMembers groupId memberName groupPosition
                          |> AsyncResult.ofResult
                          |> AsyncResult.mapError MemberNameConflict
         let! saveMember = saveMember groupId newMember |> AsyncResult.ofAsync

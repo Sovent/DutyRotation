@@ -1,118 +1,135 @@
 module DutyRotation.Infrastructure.GroupRepository
 
 open System
-open FSharp.Data.Sql
+open System.Data
 open DutyRotation.Common
 open DutyRotation.CreateGroup.Types
 open DutyRotation.AddGroupMember.Types
 open DutyRotation.RotateDuties.Types
-open DutyRotation.Common
+open DutyRotation.Infrastructure.Db
+open Daffer
 
-[<Literal>]
-let connectionString = @"Data Source=den1.mssql8.gear.host;Initial Catalog=dutyrotation;Persist Security Info=True;User ID=dutyrotation;Password=Yo845n_L?4DA"
+[<CLIMutable>]
+type private GroupRow = {
+  Id: Guid
+  Name: string
+  DutiesCount: int
+  RotationCronRule: string
+  RotationStartDate: DateTime option
+  CreatedDate: DateTime
+}
 
-type sql = SqlDataProvider<
-            ConnectionString = connectionString,
-            DatabaseVendor = Common.DatabaseProviderTypes.MSSQLSERVER,
-            UseOptionTypes = true>
+[<CLIMutable>]
+type private GroupMemberRow = {
+  Id: Guid
+  Name: string
+  GroupId: Guid
+  Follows: Guid option
+}
 
-FSharp.Data.Sql.Common.QueryEvents.SqlQueryEvent |> Event.add (printfn "Executing SQL: %O")  
+let private rowToGroup (row: GroupRow) = {
+  Id = GroupId.TryParse row.Id |> Result.value
+  Settings = {
+    Name = GroupName.TryParse row.Name |> Result.value
+    RotationCronRule = RotationCronRule.TryParse row.RotationCronRule |> Result.value
+    RotationStartDate = row.RotationStartDate
+                        |> Option.map (fun date -> new DateTimeOffset(date))
+                        |> Option.map RotationStartDate
+    DutiesCount = DutiesCount.TryGet row.DutiesCount |> Result.value
+  }
+}
 
-let tryGetGroup (ctx: sql.dataContext) (groupId:GroupId) =
+let private rowToGroupMember row = {
+  Id = GroupMemberId.TryGet row.Id |> Result.value
+  Name = GroupMemberName.TryParse row.Name |> Result.value
+  QueuePosition = match row.Follows with
+                    | None -> First
+                    | Some id -> GroupMemberId.TryGet id |> Result.value |> Following
+}
+
+let private tryGetGroup (connection:IDbConnection) (groupId:GroupId) =
   async {
-    let! groupEntity = Seq.tryHeadAsync ( query {
-        for group in ctx.Dbo.Groups do
-        where (group.Id = groupId.Value)
-        select (group)
-      })
-    return groupEntity |> Option.map (fun entity ->
-      {
-        Group.Id = GroupId.TryParse entity.Id |> Result.value
-        Settings = {
-          DutiesCount = DutiesCount.TryGet entity.DutiesCount |> Result.value
-          RotationCronRule = RotationCronRule.TryParse entity.RotationCronRule |> Result.value
-          Name = GroupName.TryParse entity.Name |> Result.value
-          RotationStartDate = entity.RotationStartDate
-                              |> Option.map (fun date -> date |> DateTimeOffset |> RotationStartDate)
-        }
-      })
+    let! groupRow = 
+      querySingleMaybeAsync<GroupRow>
+        connection
+        "select top (1) * from Groups where Id=@GroupId"
+        ["GroupId" => groupId.Value]
+      
+    return groupRow |> Option.map rowToGroup
+  }
+
+let private asyncGetGroupMembers (connection:IDbConnection) (groupId:GroupId) =
+  async {
+    let! groupRows =
+      queryAsync<GroupMemberRow>
+        connection
+        "select * from GroupMembers where GroupId=@GroupId"
+        ["GroupId" => groupId.Value]
+    return groupRows |> List.map rowToGroupMember
   }
   
-let getGroup (ctx: sql.dataContext) (groupId: GroupId) =
-  asyncResult {
-    let! groupOption = groupId |> tryGetGroup ctx |> AsyncResult.ofAsync
-    return! match groupOption with
-            | Some group -> AsyncResult.retn group
-            | None -> { GroupId = groupId } |> AsyncResult.ofError
-  }
-  
-let getGroupMembers (ctx: sql.dataContext) (groupId:GroupId) =
-  let rows = Seq.executeQueryAsync (query {
-        for groupMember in ctx.Dbo.GroupMembers do
-        where (groupMember.GroupId = groupId.Value)
-        select (groupMember)
-      })
-  rows |> Async.map (Seq.map (fun row -> {
-        Id = GroupMemberId.TryGet row.Id |> Result.value
-        Name = GroupMemberName.TryParse row.Name |> Result.value
-        Position = row.QueuePosition |> GroupMemberQueuePosition.tryGet |> Result.value
-      }))
-  
-let saveGroup : SaveGroup =
+let saveGroup (connection:IDbConnection) : SaveGroup =
   fun group ->
-    let ctx = sql.GetDataContext()
-    let row = ctx.Dbo.Groups.Create()
-    row.Id <- group.Id.Value
-    row.Name <- group.Settings.Name.Value
-    row.DutiesCount <- group.Settings.DutiesCount.Value
-    row.RotationCronRule <- group.Settings.RotationCronRule.Value
-    row.RotationStartDate <- group.Settings.RotationStartDate |> Option.map (fun date -> date.Value.UtcDateTime)
-    row.CreatedDate <- DateTime.UtcNow   
-    ctx.SubmitUpdatesAsync ()
+    let rotationStartDate = group.Settings.RotationStartDate
+                            |> Option.map (fun date -> date.Value.DateTime)
+                            |> Option.toNullable
+    executeAsync
+      connection
+      "INSERT INTO Groups (Id, Name, DutiesCount, RotationCronRule, RotationStartDate, CreatedDate)
+      VALUES (@GroupId, @GroupName, @DutiesCount, @RotationCronRule, @RotationStartDate, @CreatedDate)"
+      ["GroupId" => group.Id.Value;
+        "GroupName" => group.Settings.Name.Value;
+        "DutiesCount" => group.Settings.DutiesCount.Value;
+        "RotationCronRule" => group.Settings.RotationCronRule.Value;
+        "RotationStartDate" => rotationStartDate;
+        "CreatedDate" => DateTime.UtcNow] |> Async.map (fun _ -> ())
 
-let getGroupMember: DutyRotation.AddGroupMember.Types.GetGroupMembers =
+let getGroupMembers (connection:IDbConnection): DutyRotation.AddGroupMember.Types.GetGroupMembers =
   fun groupId ->
-    let ctx = sql.GetDataContext()
-    let groupMembers = asyncResult {
-      let! group = getGroup ctx groupId
-      return! getGroupMembers ctx groupId |> AsyncResult.ofAsync
-    }
-    groupMembers |> AsyncResult.map Seq.toList
-    
-  
-let saveMember: SaveMember =
-  fun groupId groupMember ->
-    let ctx = sql.GetDataContext()
-    let row = ctx.Dbo.GroupMembers.Create()
-    row.Id <- groupMember.Id.Value
-    row.Name <- groupMember.Name.Value
-    row.GroupId <- groupId.Value
-    row.QueuePosition <- groupMember.Position.Value
-    ctx.SubmitUpdatesAsync ()
-    
-let getGroupDutiesCount: GetGroupDutiesCount =
-  fun groupId ->
-    let ctx = sql.GetDataContext()
     asyncResult {
-      let! group = groupId |> getGroup ctx
-      return group.Settings.DutiesCount
-    }
+      let! group = tryGetGroup connection groupId |> AsyncResult.ofAsync
+      return! match group with
+                | None -> { GroupNotFoundError.GroupId = groupId } |> AsyncResult.ofError
+                | Some _ -> asyncGetGroupMembers connection groupId |> Async.map Seq.toList |> AsyncResult.ofAsync
+    }    
+  
+let saveMember (connection:IDbConnection) : SaveMember =
+  fun groupId groupMember ->
+    executeAsync
+      connection
+      "INSERT INTO GroupMembers
+      VALUES (@MemberId, @Name, @GroupId, @Follows)"
+      ["MemberId" => groupMember.Id.Value;
+        "Name" => groupMember.Name.Value;
+        "GroupId" => groupId.Value;
+        "Follows" => match groupMember.QueuePosition with
+                      | First -> Nullable()
+                      | Following memberId -> Nullable memberId.Value]
+    |> Async.map (fun _ -> ())
     
-let getGroupMembersForRotation : DutyRotation.RotateDuties.Types.GetGroupMembers =
-  fun groupId -> let ctx = sql.GetDataContext() in getGroupMembers ctx groupId
+let getGroupDutiesCount (connection:IDbConnection) : GetGroupDutiesCount =
+  fun groupId ->
+    asyncResult {
+      let! group = tryGetGroup connection groupId |> AsyncResult.ofAsync
+      return! match group with
+              | None -> { GroupNotFoundError.GroupId = groupId } |> AsyncResult.ofError
+              | Some group -> group.Settings.DutiesCount |> AsyncResult.ofSuccess
+    }
+   
+let getGroupMembersForRotation (connection:IDbConnection) : DutyRotation.RotateDuties.Types.GetGroupMembers =
+  asyncGetGroupMembers connection
 
-let saveMembers : SaveMembers =
-  fun groupId groupMembers ->
-    let ctx = sql.GetDataContext()
+let saveMembers (connection:IDbConnection): SaveMembers =
+  fun groupId (newFirst, newTail) ->
+    let executeAsync sql parameters = executeAsync connection sql parameters |> Async.map (fun _ -> ())
     async {
-      for groupMember in groupMembers do
-          let! row = Seq.headAsync ( query {
-            for entity in ctx.Dbo.GroupMembers do
-            where (entity.Id = groupMember.Id.Value)
-            select (entity)
-          })
-          row.QueuePosition <- groupMember.Position.Value
-      do! ctx.SubmitUpdatesAsync ()
+      do! executeAsync
+            "UPDATE GroupMembers SET Follows=null WHERE Id = @Id"
+            ["Id" => newFirst.Id.Value] 
+      do! executeAsync
+            "UPDATE GroupMembers SET Follows=@FollowedId WHERE Id = @Id"
+            ["Id" => newTail.Id.Value;
+             "FollowedId" => let (Following followed) = newTail.QueuePosition in followed.Value]
     }
     
     

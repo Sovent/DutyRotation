@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Common\Nullable.fs" />
     <Compile Include="Common\Seq.fs" />
     <Compile Include="Common\Async.fs" />
     <Compile Include="Common\Result.fs" />

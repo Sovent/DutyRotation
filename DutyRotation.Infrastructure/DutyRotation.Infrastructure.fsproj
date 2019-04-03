@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Db.fs" />
     <Compile Include="GroupRepository.fs" />
     <Compile Include="CompositionRoot.fs" />
     <Compile Include="JsonSerializers.fs" />
@@ -15,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Daffer" Version="1.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
-    <PackageReference Include="SQLProvider" Version="1.1.58" />
   </ItemGroup>
 
 </Project>

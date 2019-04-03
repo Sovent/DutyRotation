@@ -42,16 +42,6 @@ type GroupMemberName = private GroupMemberName of string
 with
   member this.Value = let (GroupMemberName groupMemberName) = this in groupMemberName
   static member TryParse = ConstrainedType.createDefaultConstrainedString GroupMemberName
-
-type GroupMemberQueuePosition = private GroupMemberQueuePosition of int
-with
-  member this.Value = let (GroupMemberQueuePosition queuePosition) = this in queuePosition
-
-module GroupMemberQueuePosition =  
-  let tryGet = ConstrainedType.createInt GroupMemberQueuePosition 0 Int32.MaxValue
-  let first = GroupMemberQueuePosition 0
-  let shiftOn n (GroupMemberQueuePosition queuePosition) = queuePosition + n |> min 0 |> GroupMemberQueuePosition
-  let nextAfter = shiftOn 1
   
 type SlackChannel = private SlackChannel of string
 
