@@ -11,6 +11,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DutyRotation.Infrastructure
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DutyRotation.Api", "DutyRotation.Api\DutyRotation.Api.fsproj", "{77F6F80B-A4B5-4818-AE3E-82C3ACF13DB4}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DutyRotation.UnitTest", "DutyRotation.UnitTest\DutyRotation.UnitTest.fsproj", "{8018D578-007E-45B1-B6FB-9FBAF6122FC2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,10 @@ Global
 		{77F6F80B-A4B5-4818-AE3E-82C3ACF13DB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77F6F80B-A4B5-4818-AE3E-82C3ACF13DB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77F6F80B-A4B5-4818-AE3E-82C3ACF13DB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8018D578-007E-45B1-B6FB-9FBAF6122FC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8018D578-007E-45B1-B6FB-9FBAF6122FC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8018D578-007E-45B1-B6FB-9FBAF6122FC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8018D578-007E-45B1-B6FB-9FBAF6122FC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

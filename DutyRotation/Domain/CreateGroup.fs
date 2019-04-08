@@ -29,7 +29,7 @@ module Implementation =
   open Types
   open Contract
   
-  let private getGroupSettings : GetGroupSettings =
+  let getGroupSettings : GetGroupSettings =
     fun command ->
       let createGroupSettings groupName rotationCronRule dutiesCount rotationStartDate = {
           Name = groupName
