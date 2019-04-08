@@ -8,12 +8,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="Generators.fs" />
         <Compile Include="CreateGroupTests.fs" />
+        <Compile Include="QueuePositionTests.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="FsUnit.xUnit" Version="3.4.0" />
+        <PackageReference Include="Hedgehog" Version="0.8.2" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
         <PackageReference Include="xunit" Version="2.4.1" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
