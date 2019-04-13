@@ -34,15 +34,6 @@ module GroupMember =
 
 module QueuePosition =
   let tail groupMembers =
-    let rec findLastPosition membersTail (currentLastMember:GroupMemberId)  =
-      match membersTail with
-      | [] -> currentLastMember
-      | head :: tail ->
-        match head.QueuePosition with
-        | First -> findLastPosition tail currentLastMember
-        | Following memberId -> if memberId = currentLastMember
-                                  then head.Id
-                                  else currentLastMember |> findLastPosition tail 
-    match groupMembers with
-    | [] -> First
-    | head :: tail -> findLastPosition tail head.Id |> Following
+    match groupMembers |> GroupMember.sortInQueue |> List.tryLast with
+    | Some item -> Following item.Id
+    | None -> First

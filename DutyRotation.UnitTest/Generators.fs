@@ -8,6 +8,8 @@ module Gen =
     Gen.sample (Size.MaxValue) 1 gen |> List.head
 
 module Generators =
+  open System
+
   let groupMemberId : Gen<GroupMemberId> =
     gen {
       return GroupMemberId.New
@@ -26,4 +28,19 @@ module Generators =
       let! id = groupMemberId
       let! name = groupMemberName
       return { GroupMember.Id = id; Name = name; QueuePosition = First }
+    }
+  
+  let orderedGroupMembers : Gen<GroupMember list> =
+    gen {
+      let! first::rest = Gen.list (Range.constant 2 10) groupMember
+      let queuedRest,_ = rest
+                      |> List.mapFold (fun lastMemberId currentMember ->
+                        {currentMember with QueuePosition = Following lastMemberId},currentMember.Id) first.Id
+      return first :: queuedRest
+    }
+    
+  let shuffledGroupMembers : Gen<GroupMember list> =
+    gen {
+      let! orderedGroupMembers = orderedGroupMembers
+      return orderedGroupMembers |> List.sortBy (fun _ -> Guid.NewGuid())
     }
