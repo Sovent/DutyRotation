@@ -1,11 +1,14 @@
 namespace DutyRotation
 
+open System
 open Hedgehog
 open DutyRotation.Common
 
 module Gen =
   let single (gen:Gen<'a>) : 'a =
     Gen.sample (Size.MaxValue) 1 gen |> List.head
+  let randomElement (list:'a list) : 'a =
+    list |> List.sortBy (fun _ -> Guid.NewGuid()) |> List.head
 
 module Generators =
   open System
@@ -15,6 +18,11 @@ module Generators =
       return GroupMemberId.New
     }
   
+  let groupId : Gen<GroupId> =
+    gen {
+      return GroupId.New
+    }
+    
   let groupMemberName : Gen<GroupMemberName> =
     gen {
       let range = Range.constant 3 10
@@ -28,19 +36,26 @@ module Generators =
       let! id = groupMemberId
       let! name = groupMemberName
       return { GroupMember.Id = id; Name = name; QueuePosition = First }
-    }
-  
-  let orderedGroupMembers : Gen<GroupMember list> =
+    }  
+    
+  let orderedGroupMembers minimum : Gen<GroupMember list> =
     gen {
-      let! first::rest = Gen.list (Range.constant 2 10) groupMember
-      let queuedRest,_ = rest
-                      |> List.mapFold (fun lastMemberId currentMember ->
-                        {currentMember with QueuePosition = Following lastMemberId},currentMember.Id) first.Id
-      return first :: queuedRest
+      let! unqueuedMembersWithUniqueNames =
+        Gen.list (Range.constant minimum 10) groupMember
+        |> Gen.filter (fun members -> members
+                                      |> List.groupBy (fun membr -> membr.Name)
+                                      |> List.forall (fun (key, group) -> List.length group = 1))
+      match unqueuedMembersWithUniqueNames with
+      | [] -> return []
+      | first :: rest ->
+        let queuedRest,_ = rest
+                        |> List.mapFold (fun lastMemberId currentMember ->
+                          {currentMember with QueuePosition = Following lastMemberId},currentMember.Id) first.Id
+        return first :: queuedRest
     }
     
-  let shuffledGroupMembers : Gen<GroupMember list> =
+  let shuffledGroupMembers minimum : Gen<GroupMember list> =
     gen {
-      let! orderedGroupMembers = orderedGroupMembers
+      let! orderedGroupMembers = orderedGroupMembers minimum
       return orderedGroupMembers |> List.sortBy (fun _ -> Guid.NewGuid())
     }

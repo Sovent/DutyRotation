@@ -11,6 +11,7 @@
         <Compile Include="Generators.fs" />
         <Compile Include="CreateGroupTests.fs" />
         <Compile Include="QueuePositionTests.fs" />
+        <Compile Include="AddGroupMemberTests.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 

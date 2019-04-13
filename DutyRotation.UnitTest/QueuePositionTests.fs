@@ -25,7 +25,7 @@ let ``Finding tail in single member list`` () =
 [<Fact>]
 let ``For list with 2 or more members no one holds found tail queue position`` () =
   property {
-    let! groupMemberList = Generators.shuffledGroupMembers
+    let! groupMemberList = Generators.shuffledGroupMembers 2
     
     let tailPosition = QueuePosition.tail groupMemberList
     
@@ -35,7 +35,7 @@ let ``For list with 2 or more members no one holds found tail queue position`` (
 [<Fact>] 
 let ``For list with 2 or members tail should follow someone inside the queue`` () =
   property {
-    let! groupMemberList = Generators.shuffledGroupMembers
+    let! groupMemberList = Generators.shuffledGroupMembers 2
     
     let (Following memberId) = QueuePosition.tail groupMemberList
     

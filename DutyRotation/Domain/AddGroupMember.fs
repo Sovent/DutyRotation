@@ -52,7 +52,7 @@ module Implementation =
   
   let getQueuePosition : GetQueuePosition = QueuePosition.tail
     
-  let addNewMember (getNewMemberId:GetNewMemberId) : CreateNewMember =
+  let createNewMember (getNewMemberId:GetNewMemberId) : CreateNewMember =
     fun members groupId newMemberName queuePosition ->
       if Seq.exists (fun groupMember -> groupMember.Name = newMemberName) members then
         {
@@ -79,7 +79,7 @@ module Implementation =
         let! groupMembers = getGroupMembers groupId
                             |> AsyncResult.mapError GroupNotFound
         let groupPosition = getQueuePosition groupMembers
-        let! newMember = addNewMember getNewMemberId groupMembers groupId memberName groupPosition
+        let! newMember = createNewMember getNewMemberId groupMembers groupId memberName groupPosition
                          |> AsyncResult.ofResult
                          |> AsyncResult.mapError MemberNameConflict
         let! saveMember = saveMember groupId newMember |> AsyncResult.ofAsync
