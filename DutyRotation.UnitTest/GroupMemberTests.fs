@@ -1,11 +1,9 @@
 module DutyRotation.GroupMemberTests
 
-open System
 open DutyRotation
 open Hedgehog
 open Xunit
 open DutyRotation.Common
-open FsUnit.Xunit
 
 [<Fact>]
 let ``Sort any shuffled group returns ordered group`` () =

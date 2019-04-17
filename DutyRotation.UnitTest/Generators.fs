@@ -11,8 +11,6 @@ module Gen =
     list |> List.sortBy (fun _ -> Guid.NewGuid()) |> List.head
 
 module Generators =
-  open System
-
   let groupMemberId : Gen<GroupMemberId> =
     gen {
       return GroupMemberId.New
@@ -37,6 +35,12 @@ module Generators =
       let! name = groupMemberName
       return { GroupMember.Id = id; Name = name; QueuePosition = First }
     }  
+  
+  let dutiesCount minimum: Gen<DutiesCount> =
+    gen {
+      let! count = Range.constant minimum 10 |> Gen.int
+      return DutiesCount.TryGet count |> Result.value
+    }
     
   let orderedGroupMembers minimum : Gen<GroupMember list> =
     gen {
