@@ -23,9 +23,8 @@ module Generators =
     
   let groupMemberName : Gen<GroupMemberName> =
     gen {
-      let range = Range.constant 3 10
       let allowedChar = Gen.char 'A' 'z'
-      let! groupMemberName = Gen.string (Range.constant 3 10) allowedChar
+      let! groupMemberName = Gen.string (Range.linear 3 10) allowedChar
       return GroupMemberName.TryParse groupMemberName |> Result.value
     }
     
@@ -38,14 +37,14 @@ module Generators =
   
   let dutiesCount minimum: Gen<DutiesCount> =
     gen {
-      let! count = Range.constant minimum 10 |> Gen.int
+      let! count = Range.linear minimum 10 |> Gen.int
       return DutiesCount.TryGet count |> Result.value
     }
     
   let orderedGroupMembers minimum : Gen<GroupMember list> =
     gen {
       let! unqueuedMembersWithUniqueNames =
-        Gen.list (Range.constant minimum 10) groupMember
+        Gen.list (Range.linear minimum 20) groupMember
         |> Gen.filter (fun members -> members
                                       |> List.groupBy (fun membr -> membr.Name)
                                       |> List.forall (fun (key, group) -> List.length group = 1))
