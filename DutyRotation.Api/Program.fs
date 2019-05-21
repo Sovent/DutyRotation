@@ -15,7 +15,10 @@ module Program =
     
     let webApp =
       choose [
-        route "/ping"   >=> text "pong"
+        GET >=> choose [
+          route "/ping" >=> text "pong"
+          routeCif "/groups/%O" getGroupInfo
+        ]
         POST >=> choose [
           routeCif "/groups/%O/members" addGroupMember
           routeCif "/groups/%O/rotation" rotateDuties

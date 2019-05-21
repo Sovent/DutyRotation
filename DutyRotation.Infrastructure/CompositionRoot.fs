@@ -27,3 +27,11 @@ module CompositionRoot =
         let getGroupMembersForRotation = GroupRepository.getGroupMembersForRotation conn
         let saveMembers = GroupRepository.saveMembers conn
         rotateDuties getGroupDutiesCount getGroupMembersForRotation saveMembers command
+        
+  open DutyRotation.GetGroupInfo.Contract
+  open DutyRotation.GetGroupInfo.Implementation
+  let getGroupInfo : GetGroupInfo =
+    fun command ->
+      Db.execute <| fun conn ->
+        let retrieveGroupInfo = GroupRepository.retrieveGroupInfo conn
+        getGroupInfo retrieveGroupInfo command

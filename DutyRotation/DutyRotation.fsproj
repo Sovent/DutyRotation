@@ -17,6 +17,7 @@
     <Compile Include="Domain\CreateGroup.fs" />
     <Compile Include="Domain\AddGroupMember.fs" />
     <Compile Include="Domain\RotateDuties.fs" />
+    <Compile Include="Domain\GetGroupInfo.fs" />
   </ItemGroup>
 
 </Project>

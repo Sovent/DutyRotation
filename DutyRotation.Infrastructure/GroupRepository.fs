@@ -58,6 +58,18 @@ let private tryGetGroup (connection:IDbConnection) (groupId:GroupId) =
     return groupRow |> Option.map rowToGroup
   }
 
+let private mapGroupOrError<'a>
+  (mapAsync: Group -> Async<'a>)
+  (connection: IDbConnection)
+  (groupId:GroupId)
+  : AsyncResult<'a, GroupNotFoundError> =
+  asyncResult {
+    let! group = tryGetGroup connection groupId |> AsyncResult.ofAsync
+    return! match group with
+                | None -> { GroupNotFoundError.GroupId = groupId } |> AsyncResult.ofError
+                | Some g -> g |> mapAsync |> AsyncResult.ofAsync
+  }
+  
 let private asyncGetGroupMembers (connection:IDbConnection) (groupId:GroupId) =
   async {
     let! groupRows =
@@ -86,12 +98,7 @@ let saveGroup (connection:IDbConnection) : SaveGroup =
 
 let getGroupMembers (connection:IDbConnection): DutyRotation.AddGroupMember.Types.GetGroupMembers =
   fun groupId ->
-    asyncResult {
-      let! group = tryGetGroup connection groupId |> AsyncResult.ofAsync
-      return! match group with
-                | None -> { GroupNotFoundError.GroupId = groupId } |> AsyncResult.ofError
-                | Some _ -> asyncGetGroupMembers connection groupId |> Async.map Seq.toList |> AsyncResult.ofAsync
-    }    
+    mapGroupOrError (fun _ -> asyncGetGroupMembers connection groupId |> Async.map Seq.toList) connection groupId
   
 let saveMember (connection:IDbConnection) : SaveMember =
   fun groupId groupMember ->
@@ -109,12 +116,7 @@ let saveMember (connection:IDbConnection) : SaveMember =
     
 let getGroupDutiesCount (connection:IDbConnection) : GetGroupDutiesCount =
   fun groupId ->
-    asyncResult {
-      let! group = tryGetGroup connection groupId |> AsyncResult.ofAsync
-      return! match group with
-              | None -> { GroupNotFoundError.GroupId = groupId } |> AsyncResult.ofError
-              | Some group -> group.Settings.DutiesCount |> AsyncResult.ofSuccess
-    }
+    mapGroupOrError (fun group -> group.Settings.DutiesCount |> Async.retn) connection groupId
    
 let getGroupMembersForRotation (connection:IDbConnection) : DutyRotation.RotateDuties.Types.GetGroupMembers =
   asyncGetGroupMembers connection
@@ -131,5 +133,12 @@ let saveMembers (connection:IDbConnection): SaveMembers =
             ["Id" => newTail.Id.Value;
              "FollowedId" => let (Following followed) = newTail.QueuePosition in followed.Value]
     }
+    
+let retrieveGroupInfo (connection:IDbConnection) : DutyRotation.GetGroupInfo.Types.RetrieveGroupInfo =
+  fun groupId ->
+    mapGroupOrError
+      (fun group -> asyncGetGroupMembers connection groupId |> Async.map (fun members -> group, members))
+      connection
+      groupId
     
     
