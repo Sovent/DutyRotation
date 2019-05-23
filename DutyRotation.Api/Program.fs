@@ -32,7 +32,7 @@ module Program =
     let configureServices (services : IServiceCollection) =
       services.AddGiraffe() |> ignore
       
-      services.AddSingleton<IJsonSerializer>(NewtonsoftJsonSerializer(jsonSerializationSettings)) |> ignore
+      services.AddSingleton<IJsonSerializer>(NewtonsoftJsonSerializer jsonSerializationSettings) |> ignore
         
     let CreateWebHostBuilder args =
         WebHostBuilder()
