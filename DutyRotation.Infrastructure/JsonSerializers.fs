@@ -2,9 +2,7 @@ module DutyRotation.Infrastructure.JsonSerializers
 
 open System
 open System.IO
-open System.Reflection
 open FSharp.Reflection
-open FSharpReflectionExtensions
 
 open Newtonsoft.Json
 

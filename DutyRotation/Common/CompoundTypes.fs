@@ -37,3 +37,11 @@ module QueuePosition =
     match groupMembers |> GroupMember.sortInQueue |> List.tryLast with
     | Some item -> Following item.Id
     | None -> First
+
+type SendMembersToSlack = {
+  Description: string
+  Channel: string
+}
+
+type TriggerAction =
+  | SendMembersToSlack of SendMembersToSlack
