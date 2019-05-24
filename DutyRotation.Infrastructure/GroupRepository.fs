@@ -6,7 +6,6 @@ open DutyRotation.Common
 open DutyRotation.CreateGroup.Types
 open DutyRotation.AddGroupMember.Types
 open DutyRotation.RotateDuties.Types
-open DutyRotation.Infrastructure.Db
 open Daffer
 
 [<CLIMutable>]
@@ -141,4 +140,6 @@ let retrieveGroupInfo (connection:IDbConnection) : DutyRotation.GetGroupInfo.Typ
       connection
       groupId
     
-    
+let checkIfGroupExists (connection:IDbConnection) : DutyRotation.AddTriggerAction.Types.CheckIfGroupExists =
+  fun groupId ->
+    mapGroupOrError (fun _ -> Async.retn ()) connection groupId

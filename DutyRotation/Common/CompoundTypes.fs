@@ -45,3 +45,7 @@ type SendMembersToSlack = {
 
 type TriggerAction =
   | SendMembersToSlack of SendMembersToSlack
+  
+type TriggerTarget =
+  | AddMembers
+  | RotateDuties

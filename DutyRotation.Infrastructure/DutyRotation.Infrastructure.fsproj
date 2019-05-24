@@ -7,6 +7,7 @@
   <ItemGroup>
     <Compile Include="Db.fs" />
     <Compile Include="GroupRepository.fs" />
+    <Compile Include="TriggerActionsRepository.fs" />
     <Compile Include="CompositionRoot.fs" />
     <Compile Include="JsonSerializers.fs" />
   </ItemGroup>
