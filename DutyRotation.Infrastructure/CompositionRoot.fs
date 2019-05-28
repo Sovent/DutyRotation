@@ -38,7 +38,7 @@ module CompositionRoot =
         
   open DutyRotation.AddTriggerAction.Contract
   open DutyRotation.AddTriggerAction.Implementation
-  let addTriggerActio : AddTriggerAction =
+  let addTriggerAction : AddTriggerAction =
     fun command ->
       Db.execute <| fun conn ->
         let doesChannelExists (channel:string) = Async.retn true

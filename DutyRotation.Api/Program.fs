@@ -23,6 +23,7 @@ module Program =
           routeCif "/groups/%O/members" addGroupMember
           routeCif "/groups/%O/rotation" rotateDuties
           route "/groups" >=> createSimpleGroup
+          routeCif "/groups/%O/triggerActions" addTriggerAction
         ]
       ]
 

@@ -28,7 +28,7 @@ let saveAction (connection:IDbConnection) : DutyRotation.AddTriggerAction.Types.
   fun groupId target action ->    
     executeAsync
       connection
-      "INSERT INTO GroupTriggerAction(Id, GroupId, Target, Discriminator, SlackMessage, SlackChannel)
+      "INSERT INTO GroupTriggerActions(Id, GroupId, Target, Discriminator, SlackMessage, SlackChannel)
       VALUES (@Id, @GroupId, @Target, @Discriminator, @SlackMessage, @SlackChannel)"
       (
        ["Id" => Guid.NewGuid()

@@ -5,66 +5,66 @@ open DutyRotation.CreateGroup.Contract
 open DutyRotation.AddGroupMember.Contract
 open DutyRotation.RotateDuties.Contract
 open DutyRotation.GetGroupInfo.Contract
+open DutyRotation.AddTriggerAction.Contract
+open DutyRotation.Common
 open DutyRotation.Infrastructure
 open FSharp.Control.Tasks
 open Microsoft.AspNetCore.Http
 
-let createSimpleGroup : HttpHandler =
+let simplyProceedRequest (execute: HttpContext -> AsyncResult<'a, 'b>): HttpHandler =
   fun (next: HttpFunc) (context: HttpContext) ->
     task {
       try
-        let! model = context.BindModelAsync<CreateSimpleGroupCommand>()
-        let! commandResult = CompositionRoot.createSimpleGroup model |> Async.StartAsTask
+        let! commandResult = execute context |> Async.StartAsTask
         let httpResult = match commandResult with
-                               | Ok groupId -> Successful.CREATED groupId.Value
-                               | Error errors -> RequestErrors.BAD_REQUEST errors
+                               | Ok ok -> Successful.CREATED ok
+                               | Error error -> RequestErrors.BAD_REQUEST error
         return! httpResult next context
       with
         | exc -> return! RequestErrors.BAD_REQUEST exc next context     
+    }
+
+let bindModel<'a> (context:HttpContext) = context.BindModelAsync<'a> () |> Async.AwaitTask |> AsyncResult.ofAsync 
+let createSimpleGroup : HttpHandler =
+  simplyProceedRequest <| fun context ->
+    asyncResult {
+      let! model = bindModel<CreateSimpleGroupCommand> context
+      return! CompositionRoot.createSimpleGroup model
     }
 
 [<CLIMutable>]
 type AddGroupMemberModel = { MemberName:string }
 
 let addGroupMember groupId : HttpHandler =
-  fun (next: HttpFunc) (context: HttpContext) ->
-    task {
-      try
-        let! model = context.BindModelAsync<AddGroupMemberModel>()
-        let command = { AddGroupMemberCommand.GroupId = groupId; MemberName = model.MemberName }
-        let! commandResult = CompositionRoot.addGroupMember command |> Async.StartAsTask
-        let httpResult = match commandResult with
-                             | Ok memberId -> Successful.CREATED memberId.Value
-                             | Error errors -> RequestErrors.BAD_REQUEST errors
-        return! httpResult next context
-      with
-        | exc -> return! RequestErrors.BAD_REQUEST exc next context    
+  simplyProceedRequest <| fun context ->
+    asyncResult {
+      let! model = bindModel<AddGroupMemberModel> context |> AsyncResult.mapError AddGroupMemberError.Validation
+      let command = { AddGroupMemberCommand.GroupId = groupId; MemberName = model.MemberName }
+      return! CompositionRoot.addGroupMember command
     }
 
 let rotateDuties groupId : HttpHandler =
-  fun (next: HttpFunc) (context: HttpContext) ->
-    task {
-      try
-        let command = { RotateDutiesCommand.GroupId = groupId }
-        let! commandResult = CompositionRoot.rotateDuties command |> Async.StartAsTask
-        let httpResult = match commandResult with
-                             | Ok currentDuties -> Successful.OK currentDuties
-                             | Error errors -> RequestErrors.BAD_REQUEST errors
-        return! httpResult next context
-      with
-        | exc -> return! RequestErrors.BAD_REQUEST exc next context    
-    }
+  simplyProceedRequest <| fun _ -> CompositionRoot.rotateDuties { GroupId = groupId }
     
 let getGroupInfo groupId : HttpHandler =
-  fun (next:HttpFunc) (context: HttpContext) ->
-    task {
-      try
-        let query = { GetGroupInfoQuery.GroupId = groupId }
-        let! commandResult = query |> CompositionRoot.getGroupInfo |> Async.StartAsTask
-        let httpResult = match commandResult with
-                             | Ok groupInfo -> Successful.OK groupInfo
-                             | Error errors -> RequestErrors.BAD_REQUEST errors
-        return! httpResult next context
-      with
-        | exc -> return! RequestErrors.BAD_REQUEST exc next context
+  simplyProceedRequest <| fun _ -> CompositionRoot.getGroupInfo { GroupId = groupId }
+  
+  
+[<CLIMutable>]
+type AddTriggerActionModel = {
+  Action: TriggerAction
+  Target: TriggerTarget  
+}
+
+let addTriggerAction groupId : HttpHandler =
+  simplyProceedRequest <| fun context ->
+    asyncResult {
+      let! model = bindModel<AddTriggerActionModel> context |> AsyncResult.mapError AddTriggerActionError.Validation
+      let command = {
+        GroupId = groupId
+        Action = model.Action
+        Target = model.Target
+      }
+      
+      return! CompositionRoot.addTriggerAction command
     }

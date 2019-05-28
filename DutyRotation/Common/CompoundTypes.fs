@@ -45,6 +45,7 @@ type SendMembersToSlack = {
 
 type TriggerAction =
   | SendMembersToSlack of SendMembersToSlack
+  | SendMessageToSlack
   
 type TriggerTarget =
   | AddMembers
