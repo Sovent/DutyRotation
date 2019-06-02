@@ -14,6 +14,7 @@
         <Compile Include="AddGroupMemberTests.fs" />
         <Compile Include="GroupMemberTests.fs" />
         <Compile Include="RotateDutiesTests.fs" />
+        <Compile Include="AddTriggerActionTests.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 

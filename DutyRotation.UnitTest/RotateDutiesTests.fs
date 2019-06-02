@@ -1,7 +1,6 @@
 module DutyRotation.RotateDutiesTests
 
 open DutyRotation
-open DutyRotation
 open Hedgehog
 open Xunit
 open DutyRotation.RotateDuties.Contract
@@ -12,7 +11,7 @@ open FsUnit.Xunit
 [<Fact>]
 let ``Get current duties when duties count is more than members count return all`` () =
   property {
-    let! members = Generators.orderedGroupMembers 0
+    let! members = Generators.orderedGroupMembers 0 5
     let! dutiesCount = members |> List.length |> (+) 1 |> Generators.dutiesCount
     
     let currentDuties = getCurrentDuties dutiesCount members
@@ -22,7 +21,7 @@ let ``Get current duties when duties count is more than members count return all
   
 [<Fact>]
 let ``Get 1 current duty when many group members returns first`` () =
-  let members = Generators.orderedGroupMembers 2 |> Gen.single
+  let members = Generators.orderedGroupMembers 2 20 |> Gen.single
   let dutiesCount = 1 |> DutiesCount.TryGet |> Result.value
   let expectedMember = members |> List.head
   
@@ -35,7 +34,7 @@ let ``When members count is twice as much as duties count, former duties are nev
   let toIdsSet = List.map (fun membr -> membr.Id) >> Set.ofList
   property {    
     let! dutiesCount = Generators.dutiesCount 1    
-    let! members = dutiesCount.Value * 2 |> Generators.orderedGroupMembers
+    let! members = Generators.orderedGroupMembers (dutiesCount.Value * 2) 20
     let dutiesBeforeRotation = getCurrentDuties dutiesCount members |> toIdsSet
     let rotate = rotateDuties
                    (fun _ -> dutiesCount |> AsyncResult.retn)
@@ -52,7 +51,7 @@ let ``With duties count D, members count M (M>D), greatest common divisor G = gc
   let rec gcd d m = if m = 0 then d else gcd m (d % m)
   property {
     let! dutiesCount = Generators.dutiesCount 1
-    let! members = dutiesCount.Value + 1 |> Generators.orderedGroupMembers
+    let! members = Generators.orderedGroupMembers (dutiesCount.Value + 1) 20
     let membersCount = members |> List.length
     let repeatsToGetSameCollection = membersCount / gcd dutiesCount.Value membersCount
     let extractResult (_, _, result) = result

@@ -41,10 +41,10 @@ module Generators =
       return DutiesCount.TryGet count |> Result.value
     }
     
-  let orderedGroupMembers minimum : Gen<GroupMember list> =
+  let orderedGroupMembers minimum maximum : Gen<GroupMember list> =
     gen {
       let! unqueuedMembersWithUniqueNames =
-        Gen.list (Range.linear minimum 20) groupMember
+        Gen.list (Range.linear minimum maximum) groupMember
         |> Gen.filter (fun members -> members
                                       |> List.groupBy (fun membr -> membr.Name)
                                       |> List.forall (fun (key, group) -> List.length group = 1))
@@ -57,8 +57,8 @@ module Generators =
         return first :: queuedRest
     }
     
-  let shuffledGroupMembers minimum : Gen<GroupMember list> =
+  let shuffledGroupMembers minimum maximum : Gen<GroupMember list> =
     gen {
-      let! orderedGroupMembers = orderedGroupMembers minimum
+      let! orderedGroupMembers = orderedGroupMembers minimum maximum
       return orderedGroupMembers |> List.sortBy (fun _ -> Guid.NewGuid())
     }

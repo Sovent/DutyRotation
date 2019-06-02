@@ -14,7 +14,7 @@ open FsUnit.Xunit
 let ``Trying to create member with name existing in group fails with error`` () =
   property {
     let! groupId = Generators.groupId
-    let! members = Generators.shuffledGroupMembers 1
+    let! members = Generators.shuffledGroupMembers 1 20
     let existingMember = Gen.randomElement members
     let existingName = existingMember.Name
     let tail = QueuePosition.tail members
@@ -28,7 +28,7 @@ let ``Trying to create member with name existing in group fails with error`` () 
 let ``Create member with unique name adds member to tail`` () =
   property {
     let! groupId = Generators.groupId
-    let! members = Generators.shuffledGroupMembers 0
+    let! members = Generators.shuffledGroupMembers 0 20
     let! uniqueName = Generators.groupMemberName
                       |> Gen.filter (fun name -> members |> List.forall (fun membr -> membr.Name <> name))
     let tail = QueuePosition.tail members

@@ -16,7 +16,7 @@ let ``Sort any shuffled group returns ordered group`` () =
       | _ -> false
       
   property {
-    let! groupMembers = Generators.shuffledGroupMembers 0
+    let! groupMembers = Generators.shuffledGroupMembers 0 20
     
     let sortedGroupMembers = GroupMember.sortInQueue groupMembers
     

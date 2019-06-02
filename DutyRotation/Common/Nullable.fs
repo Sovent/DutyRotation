@@ -11,13 +11,17 @@ module Option =
         function
         | None -> Nullable()
         | Some x -> Nullable(x)
+    let toNullableRef =
+        function
+        | None -> null
+        | Some x -> x
 
 let (|Null|Value|) (x: _ Nullable) =
     if x.HasValue then Value x.Value else Null
 
 module Nullable =
     let create x = Nullable x
-    let getOrDefault n v = match n with Value x -> x | _ -> v
+    let getOrDefault v n = match n with Value x -> x | _ -> v
     let getOrElse (n: 'a Nullable) (v: 'a Lazy) = match n with Value x -> x | _ -> v.Force()
     let get (x: _ Nullable) = x.Value
     let fromOption = Option.toNullable
