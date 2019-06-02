@@ -58,6 +58,11 @@ module Implementation =
           validateSlackMessage a.Description;
           validateSlackChannelExistence doesChannelExists a.Channel
         ]
+      | SendMessageToSlack a ->
+        sumValidation [
+          validateSlackMessage a.Message;
+          validateSlackChannelExistence doesChannelExists a.Channel
+        ]
         
   let addTriggerAction
     (doesChannelExists: DoesSlackChannelExists)

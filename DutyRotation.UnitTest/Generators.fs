@@ -18,7 +18,7 @@ module Generators =
   
   let groupId : Gen<GroupId> =
     gen {
-      return GroupId.New
+      return GroupId.New ()
     }
     
   let groupMemberName : Gen<GroupMemberName> =

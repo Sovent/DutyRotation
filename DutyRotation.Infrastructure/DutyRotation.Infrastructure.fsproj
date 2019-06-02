@@ -9,7 +9,6 @@
     <Compile Include="GroupRepository.fs" />
     <Compile Include="TriggerActionsRepository.fs" />
     <Compile Include="CompositionRoot.fs" />
-    <Compile Include="JsonSerializers.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +18,15 @@
   <ItemGroup>
     <PackageReference Include="Daffer" Version="1.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Json\Pickler.fs" />
+    <Compile Include="Json\UnionConverter.fs" />
+    <Compile Include="Json\TypeSafeEnumConverter.fs" />
+    <Compile Include="Json\OptionConverter.fs" />
+    <Compile Include="Json\JsonSerializers.fs" />
   </ItemGroup>
 
 </Project>

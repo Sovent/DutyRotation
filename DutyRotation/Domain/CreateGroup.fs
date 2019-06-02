@@ -45,7 +45,7 @@ module Implementation =
       let dutiesCount = DutiesCount.TryGet command.DutiesCount
       createGroupSettings <!> groupName <*> rotationCronRule <*> dutiesCount <*> rotationStartDate
 
-  let private createGroupId : CreateGroupId = fun () -> GroupId.New
+  let private createGroupId : CreateGroupId = GroupId.New
 
   let private createGroup : CreateGroup =
     fun settings id ->

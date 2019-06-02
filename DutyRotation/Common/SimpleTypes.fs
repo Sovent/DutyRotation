@@ -6,7 +6,7 @@ type GroupId = private | GroupId of Guid
 with
   member this.Value = let (GroupId groupId) = this in groupId
   static member TryParse = ConstrainedType.createGuid GroupId
-  static member New = Guid.NewGuid() |> GroupId
+  static member New () = Guid.NewGuid() |> GroupId
   
 type GroupNotFoundError = {
   GroupId : GroupId
@@ -42,7 +42,3 @@ type GroupMemberName = private GroupMemberName of string
 with
   member this.Value = let (GroupMemberName groupMemberName) = this in groupMemberName
   static member TryParse = ConstrainedType.createDefaultConstrainedString GroupMemberName
-  
-type SlackChannel = private SlackChannel of string
-
-type SlackUserGroup = private SlackUserGroup of string

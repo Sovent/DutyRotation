@@ -3,7 +3,7 @@ namespace DutyRotation.Api
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.AspNetCore.Hosting
-open DutyRotation.Infrastructure.JsonSerializers
+open DutyRotation.Infrastructure.Json
 open Giraffe
 open Giraffe.Serialization
 open GroupsController

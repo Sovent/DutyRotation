@@ -42,7 +42,7 @@ let ``When members count is twice as much as duties count, former duties are nev
                    (fun _ _ -> Async.retn ())
                    >> Async.RunSynchronously
                    >> Result.value
-    let dutiesAfterRotation = { RotateDutiesCommand.GroupId = GroupId.New.Value } |> rotate |> toIdsSet
+    let dutiesAfterRotation = { RotateDutiesCommand.GroupId = GroupId.New().Value } |> rotate |> toIdsSet
     return Set.intersect dutiesBeforeRotation dutiesAfterRotation |> Set.isEmpty
   } |> Property.check
 

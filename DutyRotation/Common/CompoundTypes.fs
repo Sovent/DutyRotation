@@ -43,9 +43,14 @@ type SendMembersToSlack = {
   Channel: string
 }
 
+type SendMessageToSlack = {
+  Message: string
+  Channel: string
+}
+
 type TriggerAction =
   | SendMembersToSlack of SendMembersToSlack
-  | SendMessageToSlack
+  | SendMessageToSlack of SendMessageToSlack
   
 type TriggerTarget =
   | AddMembers

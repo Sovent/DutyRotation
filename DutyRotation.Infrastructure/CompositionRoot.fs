@@ -43,5 +43,5 @@ module CompositionRoot =
       Db.execute <| fun conn ->
         let doesChannelExists (channel:string) = Async.retn true
         let checkIfGroupExists = GroupRepository.checkIfGroupExists conn
-        let saveTrigger = TriggerActionsRepository.saveAction conn
+        let saveTrigger = TriggerActionsRepository.Saving.saveAction conn
         addTriggerAction doesChannelExists checkIfGroupExists saveTrigger command
