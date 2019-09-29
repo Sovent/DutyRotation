@@ -1,4 +1,5 @@
 ﻿namespace DutyRotation.Common
+open System
 
 type GroupSettings = {
   Name: GroupName
@@ -55,3 +56,9 @@ type TriggerAction =
 type TriggerTarget =
   | AddMembers
   | RotateDuties
+  
+type Trigger = {
+  Id: Guid
+  Target: TriggerTarget
+  Action: TriggerAction
+}

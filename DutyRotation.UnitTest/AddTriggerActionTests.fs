@@ -7,7 +7,7 @@ open DutyRotation.AddTriggerAction.Implementation
 open DutyRotation.Common
 open FsUnit.Xunit
 
-let saveActionStub _ _ _ = Async.retn ()
+let saveActionStub _ _ = Async.retn ()
 let doesChannelExistsSuccessfulCheck _ = Async.retn true
 let doesChannelExistsFailureCheck _ = Async.retn false
 let checkGroupExistsSuccessfulCheck _ = AsyncResult.retn ()

@@ -33,7 +33,8 @@ module CompositionRoot =
   let getGroupInfo : GetGroupInfo =
     fun command ->
       Db.execute <| fun conn ->
-        let retrieveGroupInfo = GroupRepository.retrieveGroupInfo conn
+        let getTriggers = TriggersRepository.Loading.getTriggers conn
+        let retrieveGroupInfo = GroupRepository.retrieveGroupInfo conn getTriggers
         getGroupInfo retrieveGroupInfo command
         
   open DutyRotation.AddTriggerAction.Contract
@@ -43,5 +44,5 @@ module CompositionRoot =
       Db.execute <| fun conn ->
         let doesChannelExists (channel:string) = Async.retn true
         let checkIfGroupExists = GroupRepository.checkIfGroupExists conn
-        let saveTrigger = TriggerActionsRepository.Saving.saveAction conn
+        let saveTrigger = TriggersRepository.Saving.saveAction conn
         addTriggerAction doesChannelExists checkIfGroupExists saveTrigger command

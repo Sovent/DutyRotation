@@ -7,7 +7,7 @@
   <ItemGroup>
     <Compile Include="Db.fs" />
     <Compile Include="GroupRepository.fs" />
-    <Compile Include="TriggerActionsRepository.fs" />
+    <Compile Include="TriggersRepository.fs" />
     <Compile Include="CompositionRoot.fs" />
   </ItemGroup>
 

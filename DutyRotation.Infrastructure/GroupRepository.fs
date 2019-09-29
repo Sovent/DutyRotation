@@ -133,10 +133,16 @@ let saveMembers (connection:IDbConnection): SaveMembers =
              "FollowedId" => let (Following followed) = newTail.QueuePosition in followed.Value]
     }
     
-let retrieveGroupInfo (connection:IDbConnection) : DutyRotation.GetGroupInfo.Types.RetrieveGroupInfo =
+let retrieveGroupInfo (connection:IDbConnection) (asyncGetTriggers:GroupId -> Async<Trigger list>)
+  : DutyRotation.GetGroupInfo.Types.RetrieveGroupInfo =
   fun groupId ->
     mapGroupOrError
-      (fun group -> asyncGetGroupMembers connection groupId |> Async.map (fun members -> group, members))
+      (fun group ->
+        async {
+          let! groupMembers = asyncGetGroupMembers connection groupId
+          let! triggers = asyncGetTriggers groupId
+          return group, groupMembers, triggers
+        })
       connection
       groupId
     

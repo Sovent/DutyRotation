@@ -1,4 +1,4 @@
-module DutyRotation.Infrastructure.TriggerActionsRepository
+module DutyRotation.Infrastructure.TriggersRepository
 
 open System
 open System.Data
@@ -15,8 +15,10 @@ let private stringToTargetMap = targetToStringMap
                                        |> Seq.map (fun pair -> (pair.Value, pair.Key))
                                        |> Map.ofSeq
 
-module private Discriminators = 
+module private Discriminators =
+  [<Literal>]
   let sendMembersToSlack = "sendMembersToSlack";
+  [<Literal>]
   let sendMessageToSlack = "sendMessageToSlack";
 
 module private Parameters =
@@ -46,18 +48,59 @@ module Saving =
          dicriminator = Discriminators.sendMessageToSlack
        )
   
-  let private allParameters (groupId:GroupId) target action =
+  let private allParameters (groupId:GroupId) trigger =
     seq {
-      yield "Id" => Guid.NewGuid()
+      yield "Id" => trigger.Id
       yield "GroupId" => groupId.Value
-      yield "Target" => targetToStringMap.[target]
-      yield! (action |> parametersForAction |> (fun p -> p.AsSeq))
+      yield "Target" => targetToStringMap.[trigger.Target]
+      yield! (trigger.Action |> parametersForAction |> (fun p -> p.AsSeq))
     } |> Seq.toList
     
   let saveAction (connection:IDbConnection) : DutyRotation.AddTriggerAction.Types.SaveAction =
-    fun groupId target action ->    
+    fun groupId trigger ->    
       executeAsync
         connection
         "INSERT INTO GroupTriggerActions(Id, GroupId, Target, Discriminator, SlackMessage, SlackChannel)
         VALUES (@Id, @GroupId, @Target, @Discriminator, @SlackMessage, @SlackChannel)"
-        (allParameters groupId target action) |> Async.map (fun _ -> ())
+        (allParameters groupId trigger) |> Async.map (fun _ -> ())
+
+module Loading =
+  [<CLIMutable>]
+  type private TriggerRow = {
+    Id: Guid
+    GroupId: Guid
+    Target: string
+    Discriminator: string
+    SlackMessage: string
+    SlackChannel: string
+  }
+  
+  let private mapToTriggerAction (row: TriggerRow) =
+    match row.Discriminator with
+    | Discriminators.sendMessageToSlack ->
+      SendMessageToSlack {
+        Message = row.SlackMessage
+        Channel = row.SlackChannel
+      }
+    | Discriminators.sendMembersToSlack ->
+      SendMembersToSlack {
+        Description = row.SlackMessage
+        Channel = row.SlackChannel
+      }
+      
+  let private mapToTrigger row =
+    {
+      Id = row.Id
+      Action = mapToTriggerAction row
+      Target = stringToTargetMap.[row.Target]
+    }
+    
+  let getTriggers (connection:IDbConnection) (groupId:GroupId) =
+    async {
+      let! rows =
+        queryAsync<TriggerRow>
+          connection
+          "select * from GroupTriggerActions where GroupId=@GroupId"
+          ["GroupId" => groupId.Value]
+      return rows |> List.map mapToTrigger        
+    }

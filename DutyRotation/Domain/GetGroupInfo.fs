@@ -16,7 +16,8 @@ module Contract =
   
   type GroupInfo = {
     Group: Group
-    Members: GroupMemberInfo list    
+    Members: GroupMemberInfo list
+    Triggers: Trigger list
   }
   
   type GetGroupInfoError =
@@ -30,22 +31,22 @@ module Types =
   
   type GetGroupId = GetGroupInfoQuery -> Result<GroupId, ValidationError>
   
-  type RetrieveGroupInfo = GroupId -> AsyncResult<Group * GroupMember list, GroupNotFoundError>
+  type RetrieveGroupInfo = GroupId -> AsyncResult<Group * GroupMember list * Trigger list, GroupNotFoundError>
   
-  type BuildGroupInfoView = Group * GroupMember list -> GroupInfo
+  type BuildGroupInfoView = Group * GroupMember list * Trigger list -> GroupInfo
   
 module Implementation =
   open Contract
   open Types
   
   let buildView : BuildGroupInfoView =
-    fun (group, members) ->
+    fun (group, members, triggers) ->
       let membersInfo =
         members
         |> GroupMember.sortInQueue
         |> List.mapi (fun index membr -> {GroupMemberInfo.Id = membr.Id; Name = membr.Name; Position = index + 1 })
         
-      { Group = group; Members = membersInfo }
+      { Group = group; Members = membersInfo; Triggers = triggers }
       
   let getGroupInfo (retrieveGroupInfo: RetrieveGroupInfo) : GetGroupInfo =
     fun query ->
@@ -54,8 +55,8 @@ module Implementation =
                        |> GroupId.TryParse
                        |> AsyncResult.ofResult
                        |> AsyncResult.mapError Validation
-        let! (group, members) = groupId |> retrieveGroupInfo |> AsyncResult.mapError GroupNotFound
-        return buildView (group, members)
+        let! (group, members, triggers) = groupId |> retrieveGroupInfo |> AsyncResult.mapError GroupNotFound
+        return buildView (group, members, triggers)
       }
   
 

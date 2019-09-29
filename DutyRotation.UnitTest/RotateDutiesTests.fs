@@ -31,7 +31,7 @@ let ``Get 1 current duty when many group members returns first`` () =
 
 [<Fact>]
 let ``When members count is twice as much as duties count, former duties are never current duties after rotation`` () =
-  let toIdsSet = List.map (fun membr -> membr.Id) >> Set.ofList
+  let toIdsSet = List.map (fun (membr:GroupMember) -> membr.Id) >> Set.ofList
   property {    
     let! dutiesCount = Generators.dutiesCount 1    
     let! members = Generators.orderedGroupMembers (dutiesCount.Value * 2) 20

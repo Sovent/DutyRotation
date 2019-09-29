@@ -14,7 +14,7 @@ module Contract =
     | Validation of ValidationError list
     | GroupNotFound of GroupNotFoundError
     
-  type AddTriggerAction = AddTriggerActionCommand -> AsyncResult<unit, AddTriggerActionError>
+  type AddTriggerAction = AddTriggerActionCommand -> AsyncResult<Trigger, AddTriggerActionError>
   
 open Contract
 module Types =
@@ -25,7 +25,9 @@ module Types =
   type ValidationResult = AsyncResult<unit, ValidationError list>
   type ValidateTriggerAction = TriggerAction -> ValidationResult
   
-  type SaveAction = GroupId -> TriggerTarget -> TriggerAction -> Async<unit>
+  type ConstructTrigger = TriggerTarget -> TriggerAction -> Trigger
+  
+  type SaveAction = GroupId -> Trigger -> Async<unit>
   
   type SlackChannelName = string
   type DoesSlackChannelExists = SlackChannelName -> Async<bool>
@@ -64,6 +66,14 @@ module Implementation =
           validateSlackChannelExistence doesChannelExists a.Channel
         ]
         
+  let constructTrigger : ConstructTrigger =
+    fun target action ->
+      {
+        Id = Guid.NewGuid()
+        Target = target
+        Action = action
+      }
+      
   let addTriggerAction
     (doesChannelExists: DoesSlackChannelExists)
     (checkIfGroupExists: CheckIfGroupExists)
@@ -73,7 +83,9 @@ module Implementation =
       let! groupId = command |> getGroupId |> AsyncResult.ofResult |> AsyncResult.mapError Validation
       do! checkIfGroupExists groupId |> AsyncResult.mapError GroupNotFound
       do! validateTriggerAction doesChannelExists command.Action |> AsyncResult.mapError Validation
-      return! saveAction groupId command.Target command.Action |> AsyncResult.ofAsync      
+      let trigger = constructTrigger command.Target command.Action
+      do! saveAction groupId trigger |> AsyncResult.ofAsync
+      return trigger
     }
         
   
